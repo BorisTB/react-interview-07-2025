@@ -1,20 +1,35 @@
-import React from 'react';
+'use client';
+
+import React, { useCallback } from 'react';
 import Collapse from '@/components/Collapse';
 import styles from './Video.module.scss';
 import VideoPlayer from '../VideoPlayer/VideoPlayer';
+import {
+  useIsVideoCompleted,
+  useIsVideoOpened,
+  useMarkCompleted,
+  useToggleOpen
+} from '@/lib/features/videos/videos.slice';
 
 const Video = ({
-  video,
-  toggleCompleted,
-  isCompleted,
-  toggleOpen,
-  isOpen,
-  isDisplayed,
+  playlistId,
+  index,
   id,
   title,
   description,
-  thumbnail
+  thumbnail,
+  toggleOpenCallback
 }) => {
+  const opened = useIsVideoOpened(id);
+  const completed = useIsVideoCompleted(id);
+  const toggleOpen = useToggleOpen(id);
+  const markCompleted = useMarkCompleted(id);
+
+  const handleToggleOpen = useCallback(() => {
+    toggleOpen();
+    toggleOpenCallback?.(index);
+  }, [toggleOpen, toggleOpenCallback, index]);
+
   return (
     <>
       {
@@ -23,23 +38,23 @@ const Video = ({
             <input
               className={styles['video__completed-checkbox']}
               type="checkbox"
-              checked={isCompleted ? 1 : 0}
-              onChange={toggleCompleted}
+              checked={completed ? 1 : 0}
+              onChange={markCompleted}
             />
           </label>
           <div className={styles['video__content']}>
             <h2 className={styles['video__title']}>{title}</h2>
-            {isOpen && (
-              <Collapse open={isOpen}>
+            {opened && (
+              <Collapse open={opened}>
                 <VideoPlayer
                   url={`https://www.youtube.com/watch?v=${id}`}
-                  onEnded={toggleCompleted}
+                  onEnded={markCompleted}
                 />
                 <p className={styles['video__description']}>{description}</p>
               </Collapse>
             )}
-            <button onClick={toggleOpen} type="button">
-              {isOpen ? 'show less' : 'show more'}
+            <button onClick={handleToggleOpen} type="button">
+              {opened ? 'show less' : 'show more'}
             </button>
           </div>
         </div>

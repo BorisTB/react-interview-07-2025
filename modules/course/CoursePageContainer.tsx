@@ -1,14 +1,25 @@
-"use client";
-import { compose } from "recompose";
+'use client';
+import { useGetPlaylistQuery } from '@/lib/store/api.service';
+import Spinner from '@/components/Spinner';
+import { ErrorInfo } from '@/components/ErrorInfo/ErrorInfo';
+import CoursePage from '@/modules/course/CoursePage';
 
-import CoursePage from "./CoursePage";
+export interface CoursePageContainerProps {
+  playlistId: string;
+}
 
-import withPlaylistData from "./HOC/withPlaylistData";
-import fetchPlaylistOnMount from "./HOC/fetchPlaylistOnMount";
+const CoursePageContainer = ({ playlistId }: CoursePageContainerProps) => {
+  const { data, isLoading, error } = useGetPlaylistQuery(playlistId);
 
-const CoursePageWithData = compose(
-  fetchPlaylistOnMount,
-  withPlaylistData
-)(CoursePage);
+  if (isLoading) {
+    return <Spinner />;
+  }
 
-export default CoursePageWithData;
+  if (error) {
+    return <ErrorInfo title="Error loading playlist" error={error} />;
+  }
+
+  return <CoursePage {...data} />;
+};
+
+export default CoursePageContainer;
