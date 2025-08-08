@@ -10,3 +10,12 @@ export async function GET(
 
   return Response.json({ playlist });
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { slug: string } }
+) {
+  mockDb.delete(params?.slug);
+
+  return Response.json({ status: 'ok' });
+}

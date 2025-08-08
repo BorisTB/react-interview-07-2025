@@ -79,8 +79,47 @@ export const playlistApi = createApi({
       ],
       transformResponse: ({ playlist }: PlaylistResponse) =>
         transformPlaylist(playlist)
+    }),
+    addPlaylist: build.mutation<Playlist, string>({
+      query: (playlistId) => ({
+        method: 'POST',
+        url: `/playlists/${playlistId}/add`
+      }),
+      invalidatesTags: [ApiTagTypes.PLAYLIST],
+      transformResponse: ({ playlist }: PlaylistResponse) =>
+        transformPlaylist(playlist)
+    }),
+    removePlaylist: build.mutation<Playlist, string>({
+      query: (playlistId) => ({
+        method: 'DELETE',
+        url: `/playlists/${playlistId}`
+      }),
+      async onQueryStarted(playlistId, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          playlistApi.util.updateQueryData(
+            'getPlaylists',
+            undefined,
+            (draft) => {
+              return draft?.filter((item) => item.id !== playlistId);
+            }
+          )
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+      invalidatesTags: (result, error, id) => [
+        { type: ApiTagTypes.PLAYLIST, id }
+      ]
     })
   })
 });
 
-export const { useGetPlaylistQuery } = playlistApi;
+export const {
+  useGetPlaylistQuery,
+  useGetPlaylistsQuery,
+  useRemovePlaylistMutation,
+  useAddPlaylistMutation
+} = playlistApi;

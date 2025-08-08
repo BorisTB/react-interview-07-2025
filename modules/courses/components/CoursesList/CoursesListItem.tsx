@@ -1,14 +1,15 @@
-import styles from "./CoursesListItem.module.scss";
+import styles from './CoursesListItem.module.scss';
 
 type Props = {
-  slug: string;
+  title: string;
+  onRemove?: () => void;
 };
 
-const CoursesListItem: React.FC<Props> = ({ slug }) => {
+const CoursesListItem: React.FC<Props> = ({ title, onRemove }) => {
   return (
-    <li className={styles["courses-list-item"]}>
-      {slug}
-      <button>remove course</button>
+    <li className={styles['courses-list-item']}>
+      {title}
+      <button onClick={onRemove}>remove course</button>
     </li>
   );
 };
